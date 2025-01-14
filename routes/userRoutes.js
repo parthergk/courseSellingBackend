@@ -2,8 +2,7 @@ const express = require("express");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { UserModel } = require("../db");
-const JWT_SCREPT = "iloveyouswati"
+const { UserModel, PurchaseModel, CourseModel } = require("../db");
 
 const userRouter = express.Router();
 
@@ -26,7 +25,7 @@ userRouter.post("/signup", async (req, res) => {
   try {
     await UserModel.create({
       name: name,
-      email: email, // Fixed typo: "emial" -> "email"
+      email: email,
       password: hashedPasssword,
     });
 
@@ -37,7 +36,7 @@ userRouter.post("/signup", async (req, res) => {
     console.error("Error registering user", error);
     res
       .status(500)
-      .json({ message: "Registration failed Internal Server Error" }); // Fixed status code and message
+      .json({ message: "Registration failed Internal Server Error" });
   }
 });
 
@@ -65,7 +64,7 @@ userRouter.post("/signin", (req, res) => {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      const token = jwt.sign({ id: findUser._id.toString()}, JWT_SCREPT);
+      const token = jwt.sign({ id: findUser._id.toString()}, process.env.JWT_SCREPT);
 
       res.status(200).json({
         message: "You are logged in successfully",
@@ -77,6 +76,24 @@ userRouter.post("/signin", (req, res) => {
   }
 });
 
-userRouter.post("/purchases", (req, res) => {});
+userRouter.post("/purchases", async (req, res) => {
+    const userId = req.userId;
+
+    const purchases = await PurchaseModel.findById({userId});
+    let purchasedCourseIds = [];
+
+    for(let i = 0; i<purchases.length; i++){
+        purchasedCourseIds.push(purchases[i].courseId)
+    }
+
+    const courseData = await CourseModel.find({
+        _id: {$in: purchasedCourseIds}
+    })
+
+    res.json({
+        purchases,
+        courseData
+    })
+});
 
 module.exports = userRouter;

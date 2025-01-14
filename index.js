@@ -1,8 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const userRoute = require("./routes/userRoutes");
 const app = express();
 const port = 3000 || process.env.PORT
 
+app.use('/api/user', userRoute);
 
 
 async function main() {
