@@ -16,8 +16,8 @@ const courseSchema = new mongoose.Schema({
     title: {type: String},
     description: {type: String},
     price: {type: Number},
-    imageUri: {type: String},
-    createdID: {type: mongoose.Types.ObjectId}
+    imageUrl: {type: String},
+    creatorId: {type: mongoose.Types.ObjectId}
 })
 
 const purchaseSchema = new mongoose.Schema({
